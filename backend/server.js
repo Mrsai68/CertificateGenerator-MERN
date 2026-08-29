@@ -13,9 +13,6 @@ import studentRoutes from './routes/studentRoutes.js';
 
 dotenv.config();
 
-// Connect to MongoDB
-connectDB();
-
 const app = express();
 
 // 1. Universal CORS Header Middleware (Essential for Vercel Serverless Preflight OPTIONS)
@@ -42,6 +39,17 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// 3. Database Connection Middleware (Ensures DB connection on every Vercel Serverless request)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error('Database connection error in request:', err);
+    next();
+  }
+});
 
 // Health Check
 app.get('/api/health', (req, res) => {
